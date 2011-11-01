@@ -33,6 +33,7 @@
 
     <dependency>
         <lib>lib/jogl.jar</lib>
+        <lib>lib/gluegen-rt.jar</lib>
     </dependency>
     
     <changelog>

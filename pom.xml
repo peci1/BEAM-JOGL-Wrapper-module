@@ -25,22 +25,22 @@
 				<checksumPolicy>warn</checksumPolicy>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>maven2-repository.dev.java.net</id>
-			<name>Java.net repository</name>
-			<url>http://download.java.net/maven/2</url>
-		</repository>
-		<repository>
-			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
-		</repository>
-		<!--<repository> -->
-		<!--<id>gt-primary</id> -->
-		<!--<name>Primary GeoTools Maven Repository</name> -->
-		<!--<url>http://maven.geotools.fr/repository</url> -->
-		<!--</repository> -->
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>bc-mvn-repo-public</id>
+			<name>Public Maven Repository at Brockmann Consult</name>
+			<url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+			<uniqueVersion>false</uniqueVersion>
+		</repository>
+		<snapshotRepository>
+			<id>bc-mvn-repo-public</id>
+			<name>Public Maven Snapshot Repository at Brockmann Consult</name>
+			<url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
@@ -60,10 +60,55 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<failOnError>false</failOnError>
+				</configuration>
+				<executions>
+					<execution>
+						<id>delete-native-libs</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+							<excludeDefaultDirectories>true</excludeDefaultDirectories>
+							<failOnError>false</failOnError>
+							<filesets>
+								<fileset>
+									<directory>src/main/resources/lib</directory>
+									<includes>
+										<include>*</include>
+									</includes>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+								<fileset>
+									<directory>target/classes/lib</directory>
+									<includes>
+										<include>*</include>
+									</includes>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+								<fileset>
+									<directory>target/dependency-maven-plugin-markers</directory>
+									<followSymlinks>false</followSymlinks>
+								</fileset>
+							</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
 					<classifier>${build.classifier}</classifier>
+					<excludes>
+						<exclude>**/.gitignore</exclude>
+						<exclude>**/lib/META-INF/**/*.*</exclude>
+						<exclude>**/lib/META-INF</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -85,7 +130,7 @@
 									<version>${jogl.version}</version>
 									<outputDirectory>src/main/resources/lib</outputDirectory>
 								</artifactItem>
-								
+
 								<artifactItem>
 									<groupId>net.java.dev.gluegen</groupId>
 									<artifactId>gluegen-rt</artifactId>
@@ -129,6 +174,20 @@
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-clean-plugin</artifactId>
+										<versionRange>[2.0,)</versionRange>
+										<goals>
+											<goal>clean</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
 										<artifactId>maven-dependency-plugin</artifactId>
 										<versionRange>[2.0,)</versionRange>
 										<goals>
@@ -144,8 +203,16 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+				
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-7</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<!-- Build Type -->
@@ -175,4 +242,15 @@
 			</properties>
 		</profile>
 	</profiles>
+	
+	<developers>
+        <developer>
+            <id>peckam</id>
+            <name>Martin Pecka</name>
+            <email>peci1@seznam.cz</email>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+   	</developers>
 </project>
